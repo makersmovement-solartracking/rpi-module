@@ -1,0 +1,89 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          - v1-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: run tests
+          command: |
+           . venv/bin/activate
+           python3 -m pytest test
+
+  deploy:
+    machine: true
+      
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          - v1-dependencies-
+
+   # Required if using a private project
+   #   - run:
+   #       name: docker login
+   #       command: |
+   #         docker login -u crmdias -p add credentials here
+      - run:
+          name: Enabling qemu
+          command: |
+            wget -N https://github.com/multiarch/qemu-user-static/releases/download/v2.9.1-1/x86_64_qemu-arm-static.tar.gz
+            tar -xvf x86_64_qemu-arm-static.tar.gz
+            docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+      - run:
+          name: build, tag and push docker image
+          command: |
+            export PROJECT=sapmakers/solar-tracking
+            docker build . -t $PROJECT:$CIRCLE_SHA1
+            export TAG=$PROJECT:latest
+            docker tag $PROJECT:$CIRCLE_SHA1 $TAG
+            docker push $TAG
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+         
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          #filters:
+           # branches:
+            #  only: production

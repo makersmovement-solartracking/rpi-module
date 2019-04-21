@@ -1,18 +1,16 @@
-import smbus
+import smbus2
 import time
 
-bus = smbus.SMBus(1)
-address = 0x04
+bus = smbus2.SMBus(1)
+address = 0x08
 
-
-def unmap(value, in_min, in_max, out_min, out_max):
-    """Unmaps the number received through the I2C connection"""
-    return (value * ((in_max - in_min) + out_min) + in_min ) / (out_max - out_min)
-
+def convert_byte_to_integer(byte_list):
+    """ Convert the separated bytes into an integer"""
+    return (byte_list[0] << 8)|byte_list[1]
 
 while True:
-    data = bus.read_byte(address)
-    print(data)
-    print(unmap(data, 0, 1023, 0, 255))
+    data = bus.read_i2c_block_data(address, 2, 2)
+    value = convert_byte_to_integer(data)
+    print(value)
     time.sleep(1)
 

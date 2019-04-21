@@ -5,21 +5,17 @@ class I2C(SMBus):
     functions necessary to create the communication
     between the Arduino and the Raspberry Pi. """
 
-    def __init__(self, addresses*):
+    def __init__(self, address):
         super.__init__(1)
-        self.SLAVES_ADDRESS = [address for address in addresses)
+        self.SLAVE_ADDRESS = address
 
 
     def get_arduino_data(self):
         """ Fetchs the Arduino data transfered through I2C. """
-        values = {}
-        for address in self.SLAVES_ADDRESS:
-            values[address] = read_i2c_block_data(address, 1)
-        return values
+        data  = read_i2c_block_data(address, 1)
+        return data
 
-    def convert_byte_to_integer(self, values):
+    def convert_byte_to_integer(self, data):
         """ Converts the byte data to an integer. """
-        ldr_data = {}
-        for slave, data in values.items():
-            ldr_data[slave] = (data[0] << 8)|data[1]
+        ldr_data = (data[0] << 8)|data[1]
         return ldr_data

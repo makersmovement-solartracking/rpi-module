@@ -12,7 +12,7 @@ class I2C:
 
     def get_arduino_data(self):
         """ Fetchs the Arduino data transfered through I2C. """
-        data  = self.connector.read_i2c_block_data(self.SLAVE_ADDRESS, 1, 2)
+        data = self.connector.read_i2c_block_data(self.SLAVE_ADDRESS, 1, 2)
         return data
 
     def convert_byte_to_integer(self, data):

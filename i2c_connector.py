@@ -11,7 +11,7 @@ def convert_byte_to_integer(data):
 
 def aggregate_bytes(most_representative, least_representative):
     """ Aggregates n bytes into a single word """
-    return (most_representative << 8 | least_representative)
+    return (most_representative << 8 | least_representative) & 0xffffffff
 
 class I2C:
     """ Represents the I2C connection and all its

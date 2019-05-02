@@ -1,5 +1,18 @@
 from smbus2 import SMBus
 
+def convert_byte_to_integer(data):
+    """ Converts the byte data to an integer. """
+    ldr_data = []
+    for i in int(len(data))/2:
+        # Creates a list with the ldrs value as integers
+        ldr_data.append(aggregate_bytes(data[i*2],data[i*2 + 1]))
+
+    return ldr_data
+
+def aggregate_bytes(most_representative, least_representative):
+    """ Aggregates n bytes into a single word """
+    return (most_representative << 8 | least_representative)
+
 class I2C:
     """ Represents the I2C connection and all its
     functions necessary to create the communication
@@ -15,11 +28,4 @@ class I2C:
         data = self.connector.read_i2c_block_data(self.SLAVE_ADDRESS, 1, (self.number_of_ldrs * 2))
         return data
 
-    def convert_byte_to_integer(self, data):
-        """ Converts the byte data to an integer. """
-        ldr_data = []
-        for i in range(0, self.number_of_ldrs, 2):
-            # Creates a list with the ldrs value as integers
-            ldr_data.append((data[i] << 8 | data[i+1]))
 
-        return ldr_data

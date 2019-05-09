@@ -28,7 +28,7 @@ void ldrIntToByte (int ldrValues[], byte ldrByteValues[], int ldrLength) {
 
 void sendData() {
   // Collects the data from the LDRs, storing it within the ldrIntValues array
-  int ldrIntValues[] = {random(0, 1023), random(0, 1023)};
+  int ldrIntValues[] = {}; // Insert your analogReads here
 
   // Length of the LDR's value array and length of LDR's byte value array
   int ldrLength = (sizeof(ldrIntValues) / sizeof(ldrIntValues[0]));
@@ -40,6 +40,9 @@ void sendData() {
   // Transforms the integers into bytes
   ldrIntToByte(ldrIntValues, ldrArray, ldrLength);
 
-  // Sends the data via I²C to the Raspberry Pi
-  Wire.write(ldrArray, ldrByteLength);
+  // Sends the data individually via I²C to the Raspberry Pi
+  for (int i = 0; i < ldrByteLength; i += 2) {
+      byte submissionValuesArray[] = {ldrArray[i], ldrArray[i+1]};
+      Wire.write(submissionValuesArray, 2);
+  }
 }

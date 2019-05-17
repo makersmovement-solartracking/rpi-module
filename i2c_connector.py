@@ -15,6 +15,11 @@ class I2C:
         """ Fetchs the Arduino data transfered through I2C. """
         return self.connector.read_i2c_block_data(self.SLAVE_ADDRESS, 1, (self.number_of_ldrs * 2))
 
+    def get_ldr_values(self):
+        brute_data = self.get_arduino_data()   
+        ldr_values = convert_byte_to_integer(brute_data)
+        return ldr_values
+
 
 def convert_byte_to_integer(data):
     """ Converts the byte data to an integer. """
@@ -53,4 +58,4 @@ class EmptyLDRListException(Exception):
     def __init__(self):
         self.message = "LDR list is empty"
         super().__init__(self.message)
-
+  

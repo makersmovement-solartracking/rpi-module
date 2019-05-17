@@ -11,5 +11,5 @@ RUN apk --update add --virtual build-dependencies libffi-dev openssl-dev python-
 
 ENV PYTHONUNBUFFERED 1
 
-ENTRYPOINT ["python3", "controller.py"]
+ENTRYPOINT ["python3", "solar_tracker.py"]
 

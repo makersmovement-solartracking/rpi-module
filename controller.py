@@ -30,9 +30,6 @@ class L298N:
 
         # Map of inputs to commands
         self.movemap = {
-            'stop': self.stop(),
-            'forward': self.forward(),
-            'backward': self.backward(),
             'low': self.change_power(25),
             'medium': self.change_power(50),
             'high': self.change_power(75)
@@ -55,8 +52,14 @@ class L298N:
                 self.movemap.keys())
             )
 
-    # MOVE COMMANDS
+    def change_power(self, level):
+        self.p.ChangeDutyCycle(level)
+        return "changed to {}".format(level)
 
+
+class Movements(enum.Enum):
+    """ Movements that can be done by the GPIO. """
+ 
     def stop(self):
         GPIO.output(self.input1, GPIO.LOW)
         GPIO.output(self.input2, GPIO.LOW)
@@ -72,39 +75,4 @@ class L298N:
         GPIO.output(self.input2, GPIO.HIGH)
         return "backwarded"
 
-    def change_power(self, level):
-        self.p.ChangeDutyCycle(level)
-        return "changed to {}".format(level)
 
-
-
-
-
-#LDR OBJECT
-
-# WIP
-
-# class LDR:
-
-#     self.pin = 4
-
-#     def __init__(self):
-#         pass
-
-#     def get_value(self):
-#         # Returns the value of the LDR
-#         pass
-
-#     def rc_time(self):
-#         count = 0
-
-#         GPIO.setup(self.pin, GPIO.OUT)
-#         GPIO.output(self.pin, GPIO.LOW)
-#         time.sleep(0.1)
-
-#         GPIO.setup(self.pin, GPIO.IN)
-
-#         while (GPIO.input(self.pin) == GPIO.LOW):
-#             count += 1
-
-#         return count

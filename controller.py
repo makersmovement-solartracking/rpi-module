@@ -1,29 +1,29 @@
+""" Controls the linear actuator movements. """
+
+from enum import Enum
 import gpio_connector as GPIO
 
 
-# LINEAR ACTUATOR OBJECT
+GPIO_INPUT_ONE = 24
+GPIO_INPUT_TWO = 23
+CHANNEL = 25
+
 
 class L298N:
-
-    # Params
-
-    input1 = 24
-    input2 = 23
-    en = 25
-    p = None
+    """ Raspberry Pi module that controls the linear actuator
+    movements. """
 
     def __init__(self):
 
         # Initialize GPIO pins
-
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.input1, GPIO.OUT)
-        GPIO.setup(self.input2, GPIO.OUT)
-        GPIO.setup(self.en, GPIO.OUT)
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.LOW)
-        self.p = GPIO.PWM(self.en, 1000)
-        self.p.start()
+        GPIO.setup(GPIO_INPUT_ONE, GPIO.OUT)
+        GPIO.setup(GPIO_INPUT_TWO, GPIO.OUT)
+        GPIO.setup(CHANNEL, GPIO.OUT)
+        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
+        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
+        self.actuator = GPIO.PWM(CHANNEL, 1000)
+        self.actuator.start()
 
         # Set default to low
         self.change_power(25)
@@ -32,47 +32,47 @@ class L298N:
         self.movemap = {
             'low': self.change_power(25),
             'medium': self.change_power(50),
-            'high': self.change_power(75)
-            }
+            'high': self.change_power(75)}
 
-    def move_multi(self, directions):
-
-        # In case you wanted to execute multiple directions
-        # for example, move_multi(["forward", "stop", "backward"])
-
-        for direction in directions:
-            return self.move(direction)
+        self.movements = {"stop": Movements.stop,
+                          "forward": Movements.forward,
+                          "backward": Movements.backward,
+                          }
 
     def move(self, direction):
+        """ Moves to a given direction. """
         try:
-            return self.movemap[direction]
+            return self.movements[direction]()
         except KeyError as e:
             print(str(e))
-            raise KeyError("Please enter a valid instruction {}".format(
-                self.movemap.keys())
-            )
+            print("Invalid movement")
 
     def change_power(self, level):
-        self.p.ChangeDutyCycle(level)
+        """ Changes the actuator power. """
+        self.actuator.ChangeDutyCycle(level)
         return "changed to {}".format(level)
 
 
-class Movements(enum.Enum):
+class Movements(Enum):
     """ Movements that can be done by the GPIO. """
- 
-    def stop(self):
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.LOW)
+
+    @classmethod
+    def stop(cls):
+        """ Stops the actuator. """
+        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
+        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
         return "stopped"
 
-    def forward(self):
-        GPIO.output(self.input1, GPIO.HIGH)
-        GPIO.output(self.input2, GPIO.LOW)
+    @classmethod
+    def forward(cls):
+        """ Moves forward. """
+        GPIO.output(GPIO_INPUT_ONE, GPIO.HIGH)
+        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
         return "forwarded"
 
-    def backward(self):
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.HIGH)
+    @classmethod
+    def backward(cls):
+        """ Moves backward. """
+        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
+        GPIO.output(GPIO_INPUT_TWO, GPIO.HIGH)
         return "backwarded"
-
-

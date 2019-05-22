@@ -16,9 +16,12 @@ class I2C:
         return self.connector.read_i2c_block_data(self.SLAVE_ADDRESS, 1, (self.number_of_ldrs * 2))
 
     def get_ldr_values(self):
-        brute_data = self.get_arduino_data()   
+        """ Gets the ldr values and validates it. """
+        brute_data = self.get_arduino_data()
         ldr_values = convert_byte_to_integer(brute_data)
-        return ldr_values
+        if validates_ldr_data(ldr_values):
+            return ldr_values
+        return False
 
 
 def convert_byte_to_integer(data):
@@ -45,6 +48,14 @@ def check_ldr_list_length(ldr_list):
         raise OddLDRListException
     return True
 
+
+def validates_ldr_data(ldr_list):
+    """ Validates the values sent to the Raspberry pi
+    from the Arduino. """
+    if 65535 in ldr_list: # Checks if the ldr_list has a invalid value (65535)
+        return False
+    else:
+        return True
 
 class OddLDRListException(Exception):
     """ Exception for an odd LDR list. """

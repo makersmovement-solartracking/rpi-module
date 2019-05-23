@@ -29,3 +29,16 @@ def test_even_ldr_list():
     ldr_list = [255, 255, 255, 255]
     assert i2c.check_ldr_list_length(ldr_list) is True
 
+
+def test_invalid_ldr_values_list():
+    """ Tests the validation of an invalid ldr values
+    list. """
+    ldr_list = [300, 487, 908, 65535]
+    assert i2c.validates_ldr_data(ldr_list) is False
+
+
+def test_valid_ldr_values_list():
+    """ Tests the validation of a valid ldr values
+    list. """
+    ldr_list = [300, 487, 908, 920]
+    assert i2c.validates_ldr_data(ldr_list) is True

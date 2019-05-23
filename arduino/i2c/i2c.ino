@@ -29,11 +29,12 @@ void ldrIntToByte (int ldrValues[], byte ldrByteValues[], int ldrLength) {
 
 void sendData() {
   // Collects the data from the LDRs, storing it within the ldrIntValues array
-  int ldrIntValues[] = {}; // Insert your analogReads here
+  int ldrIntValues[] = {1023, 1023, 1023, 1023}; // Insert your analogReads here
 
   // Length of the LDR's value array and length of LDR's byte value array
   int ldrLength = (sizeof(ldrIntValues) / sizeof(ldrIntValues[0]));
   int ldrByteLength = ldrLength * 2;
+  Serial.println(ldrByteLength);
 
   // Declares an array which will store the byte values
   byte ldrArray[ldrByteLength];

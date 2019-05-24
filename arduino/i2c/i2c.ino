@@ -29,7 +29,7 @@ void ldrIntToByte (int ldrValues[], byte ldrByteValues[], int ldrLength) {
 
 void sendData() {
   // Collects the data from the LDRs, storing it within the ldrIntValues array
-  int ldrIntValues[] = {1023, 1023, 1023, 1023}; // Insert your analogReads here
+  int ldrIntValues[] = {}; // Insert your analogReads here
 
   // Length of the LDR's value array and length of LDR's byte value array
   int ldrLength = (sizeof(ldrIntValues) / sizeof(ldrIntValues[0]));

@@ -23,7 +23,10 @@ class L298N:
         GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
         GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
         self.actuator = GPIO.PWM(CHANNEL, 1000)
-        self.actuator.start()
+        self.actuator.start(25)
+
+        # Set warnings off
+        GPIO.setwarnings(False)
 
         # Set default to low
         self.change_power(25)
@@ -35,8 +38,8 @@ class L298N:
             'high': self.change_power(75)}
 
         self.movements = {"stop": Movements.stop,
-                          "forward": Movements.forward,
-                          "backward": Movements.backward,
+                          "right": Movements.right,
+                          "left": Movements.left,
                           }
 
     def move(self, direction):
@@ -64,15 +67,15 @@ class Movements(Enum):
         return "stopped"
 
     @classmethod
-    def forward(cls):
+    def right(cls):
         """ Moves forward. """
         GPIO.output(GPIO_INPUT_ONE, GPIO.HIGH)
         GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
-        return "forwarded"
+        return "moved to right"
 
     @classmethod
-    def backward(cls):
+    def left(cls):
         """ Moves backward. """
         GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
         GPIO.output(GPIO_INPUT_TWO, GPIO.HIGH)
-        return "backwarded"
+        return "moved to left"

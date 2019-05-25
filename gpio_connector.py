@@ -23,6 +23,14 @@ def setup(pin_number, pin_type):
         GPIO.setup(pin_number, pin_type)
 
 
+def setwarnings(condition):
+    """ Sets the GPIO warnings false or true. """
+    if __LOCAL_MODE__:
+        print("Set warnings to {}".format(condition))
+    else:
+        GPIO.setwarnings(condition)
+
+
 def output(pin_number, pin_voltage):
     """ GPIO pin output. """
     if __LOCAL_MODE__:
@@ -37,7 +45,7 @@ def PWM(pin_number, frequency):
         print("Set pin {} to frequency {}".format(pin_number, frequency))
         return MockPWM
     else:
-        GPIO.PWM(pin_number, frequency)
+        return GPIO.PWM(pin_number, frequency)
 
 
 def setmode(operation):

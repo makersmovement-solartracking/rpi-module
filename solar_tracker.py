@@ -34,7 +34,7 @@ class SolarTracker:
             if self.night_mode is False:
                 print("Entering night mode...")
                 self.night_mode = True
-            sleep(1800)
+            sleep(300)
             return None
         elif self.night_mode:
             print("Exiting night mode!")
@@ -46,7 +46,10 @@ class SolarTracker:
             # Verifies if the strategy is valid
             raise Exception("Invalid strategy!")
         while True:
-            ldr_values = self.i2c.get_ldr_values()
+            try:
+                ldr_values = self.i2c.get_ldr_values()
+            except (IOError, OSError):
+                continue
             if ldr_values:
                 # Gets the selected strategy from the strategies dict
                 # and pass the ldr_values as an argument
@@ -60,6 +63,6 @@ class SolarTracker:
 
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08
-    ACCEPTABLE_DEVIATION = 50
+    ACCEPTABLE_DEVIATION = 100
     SOLAR_TRACKER = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION)
-    SOLAR_TRACKER.run()
+    SOLAR_TRACKER.run() # Argument must be the strategy used in the tracking

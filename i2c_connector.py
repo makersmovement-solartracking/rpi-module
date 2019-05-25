@@ -28,7 +28,7 @@ class I2C:
 def convert_byte_to_integer(data):
     """ Converts the byte data to an integer. """
     ldr_data = []
-    for i in int(len(data))/2:
+    for i in range(int(len(data)/2)):
         # Creates a list with the ldrs value as integers
         ldr_data.append(aggregate_bytes(data[i*2], data[i*2 + 1]))
     return ldr_data

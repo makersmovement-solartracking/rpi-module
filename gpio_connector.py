@@ -5,7 +5,7 @@ if os.getenv("EXEC_MODE", "LOCAL") == "PROD":
     OUT = GPIO.OUT
     LOW = GPIO.LOW
     HIGH = GPIO.HIGH
-    BCM = GPIO.BMC
+    BCM = GPIO.BCM
 else:
     __LOCAL_MODE__ = True
     # Variables declaration

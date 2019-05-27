@@ -13,15 +13,13 @@ class L298N:
     """ Raspberry Pi module that controls the linear actuator
     movements. """
 
-    def __init__(self):
+    def __init__(self, output_pins):
 
         # Initialize GPIO pins
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(GPIO_INPUT_ONE, GPIO.OUT)
-        GPIO.setup(GPIO_INPUT_TWO, GPIO.OUT)
+        self.setup_output_pins(output_pins)
         GPIO.setup(CHANNEL, GPIO.OUT)
-        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
-        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
+        self.initialize_output_pins(output_pins)
         self.actuator = GPIO.PWM(CHANNEL, 1000)
         self.actuator.start(25)
 
@@ -55,6 +53,16 @@ class L298N:
         self.actuator.ChangeDutyCycle(level)
         return "changed to {}".format(level)
 
+    def setup_output_pins(self, output_pins):
+        """ Setups the pins to out. """
+        for pins in output_pins: 
+            GPIO.setup(pins, GPIO.OUT)
+
+    def initialize_output_pins(self, output_pins):
+        """ initializes the output pins to low """
+        for pins in output_pins:
+            GPIO.output(pins[0], GPIO.LOW)
+            GPIO.output(pins[1], GPIO.LOW)
 
 class Movements(Enum):
     """ Movements that can be done by the GPIO. """

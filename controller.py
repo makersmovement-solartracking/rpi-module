@@ -60,22 +60,25 @@ class Movements(Enum):
     """ Movements that can be done by the GPIO. """
 
     @classmethod
-    def stop(cls):
+    def stop(cls, output_pins):
         """ Stops the actuator. """
-        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
-        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.LOW)
+            GPIO.output(pin_pairs[1], GPIO.LOW)
         return "stopped"
 
     @classmethod
-    def right(cls):
-        """ Moves forward. """
-        GPIO.output(GPIO_INPUT_ONE, GPIO.HIGH)
-        GPIO.output(GPIO_INPUT_TWO, GPIO.LOW)
-        return "moved to right"
+    def left(cls, output_pins):
+        """ Moves forward, turning the panels to the left"""
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.HIGH)
+            GPIO.output(pin_pairs[1], GPIO.LOW)
+        return "turned the panels to the left"
 
     @classmethod
-    def left(cls):
-        """ Moves backward. """
-        GPIO.output(GPIO_INPUT_ONE, GPIO.LOW)
-        GPIO.output(GPIO_INPUT_TWO, GPIO.HIGH)
+    def right(cls, output_pins):
+        """ Moves backward, turning the panels to the right """
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.LOW)
+            GPIO.output(pin_pairs[1], GPIO.HIGH)
         return "moved to left"

@@ -7,9 +7,9 @@ class SolarTracker:
     """ Controls the solar panels movement, using the I2C connection
     to obtain the LDR values data, and the L298N to move the actuator. """
 
-    def __init__(self, address, acceptable_deviation, ldr_count=2):
+    def __init__(self, address, acceptable_deviation, output_pins, ldr_count=2):
         self.acceptable_deviation = acceptable_deviation
-        self.controller = L298N()
+        self.controller = L298N(output_pins)
         self.i2c = I2C(address, ldr_count)
         self.night_mode = False
         self.strategies = {"empty": self._no_movement,
@@ -64,5 +64,6 @@ class SolarTracker:
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08
     ACCEPTABLE_DEVIATION = 100
+    OUTPUT_PINS = [(23, 24)]
     SOLAR_TRACKER = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION)
     SOLAR_TRACKER.run() # Argument must be the strategy used in the tracking

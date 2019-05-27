@@ -4,23 +4,22 @@ from enum import Enum
 import gpio_connector as GPIO
 
 
-GPIO_INPUT_ONE = 24
-GPIO_INPUT_TWO = 23
-CHANNEL = 25
-
-
 class L298N:
     """ Raspberry Pi module that controls the linear actuator
     movements. """
 
-    def __init__(self, output_pins):
+    def __init__(self, output_pins, energy_channel):
+
+        # Pins
+        self.output_pins = output_pins
+        self.energy_channel = energy_channel
 
         # Initialize GPIO pins
         GPIO.setmode(GPIO.BCM)
-        self.setup_output_pins(output_pins)
-        GPIO.setup(CHANNEL, GPIO.OUT)
-        self.initialize_output_pins(output_pins)
-        self.actuator = GPIO.PWM(CHANNEL, 1000)
+        self.setup_output_pins()
+        GPIO.setup(self.energy_channel, GPIO.OUT)
+        self.initialize_output_pins()
+        self.actuator = GPIO.PWM(self.energy_channel, 1000)
         self.actuator.start(25)
 
         # Set warnings off
@@ -37,15 +36,15 @@ class L298N:
 
         self.movements = {"stop": Movements.stop,
                           "right": Movements.right,
-                          "left": Movements.left,
+                          "left": Movements.left
                           }
 
-    def move(self, direction):
+    def move(self, direction, output_pins):
         """ Moves to a given direction. """
         try:
-            return self.movements[direction]()
-        except KeyError as e:
-            print(str(e))
+            return self.movements[direction](output_pins)
+        except KeyError as error:
+            print(str(error))
             print("Invalid movement")
 
     def change_power(self, level):
@@ -53,16 +52,17 @@ class L298N:
         self.actuator.ChangeDutyCycle(level)
         return "changed to {}".format(level)
 
-    def setup_output_pins(self, output_pins):
+    def setup_output_pins(self):
         """ Setups the pins to out. """
-        for pins in output_pins: 
+        for pins in self.output_pins:
             GPIO.setup(pins, GPIO.OUT)
 
-    def initialize_output_pins(self, output_pins):
+    def initialize_output_pins(self):
         """ initializes the output pins to low """
-        for pins in output_pins:
+        for pins in self.output_pins:
             GPIO.output(pins[0], GPIO.LOW)
             GPIO.output(pins[1], GPIO.LOW)
+
 
 class Movements(Enum):
     """ Movements that can be done by the GPIO. """
@@ -89,4 +89,4 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.LOW)
             GPIO.output(pin_pairs[1], GPIO.HIGH)
-        return "moved to left"
+        return "turned the panels to the right"

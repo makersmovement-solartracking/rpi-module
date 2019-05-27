@@ -3,7 +3,6 @@
 from time import sleep
 from csv import writer
 from datetime import datetime
-from controller import L298N
 from i2c_connector import I2C
 
 
@@ -43,10 +42,11 @@ def get_csv_data_list(data):
 while True:
     try:
         LDR_VALUES = I2C_SLAVE.get_ldr_values()
-    except (IOError, OSError) as e:
+    except (IOError, OSError):
         continue
-    CSV_DATA = get_csv_data_list(LDR_VALUES) # Creates the CSV list
-    write_to_csv_file(CSV_DATA) # Appends the data to the CSV file
-    LDR_VALUES_BY_TIME = get_ldr_values_by_time_string(LDR_VALUES) # Get the LDR values string
-    print(LDR_VALUES_BY_TIME) # Prints the LDR values
+    CSV_DATA = get_csv_data_list(LDR_VALUES)  # Creates the CSV list
+    write_to_csv_file(CSV_DATA)  # Appends the data to the CSV file
+    # Get the LDR values string
+    LDR_VALUES_BY_TIME = get_ldr_values_by_time_string(LDR_VALUES)
+    print(LDR_VALUES_BY_TIME)  # Prints the LDR values
     sleep(1)

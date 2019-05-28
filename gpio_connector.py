@@ -15,6 +15,13 @@ else:
     BCM = "bcm"
 
 
+def cleanup(signum, frame):
+    """ Cleans the GPIO pins. """
+    if __LOCAL_MODE__:
+        print("Cleaned the pins")
+    else:
+        GPIO.cleanup()
+
 def setup(pin_number, pin_type):
     """ Setups the GPIO pin. """
     if __LOCAL_MODE__:
@@ -43,7 +50,7 @@ def PWM(pin_number, frequency):
     """ GPIO pin frequency. """
     if __LOCAL_MODE__:
         print("Set pin {} to frequency {}".format(pin_number, frequency))
-        return MockPWM
+        return MockPWM()
     else:
         return GPIO.PWM(pin_number, frequency)
 
@@ -62,10 +69,10 @@ class MockPWM():
     def __init__(self):
         pass
 
-    def start():
+    def start(self, level):
         """ Simulates the PWM start. """
         print("PWM start")
 
-    def ChangeDutyCycle(level):
+    def ChangeDutyCycle(self, level):
         """ Change the power of the pin output. """
         print("Changed to {}".format(level))

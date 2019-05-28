@@ -1,17 +1,18 @@
 #include <Wire.h>
 
+#define SlaveAddress 0x8
+
 void sendData();
 
 void setup() {
   Serial.begin(9600);
   // Start the connections as a slave
-  Wire.begin(0x8);
+  Wire.begin(SlaveAddress);
   // When the R_Pi requests data from the arduino, call the sendData function.
   Wire.onRequest(sendData);
 }
 
 void loop() {
-
   delay(1);
 }
 
@@ -29,7 +30,7 @@ void ldrIntToByte (int ldrValues[], byte ldrByteValues[], int ldrLength) {
 
 void sendData() {
   // Collects the data from the LDRs, storing it within the ldrIntValues array
-  int ldrIntValues[] = {}; // Insert your analogReads here
+  int ldrIntValues[] = {analogRead(A1), analogRead(A0)}; // The left LDR must always come before the right LDR
 
   // Length of the LDR's value array and length of LDR's byte value array
   int ldrLength = (sizeof(ldrIntValues) / sizeof(ldrIntValues[0]));

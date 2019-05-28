@@ -1,38 +1,130 @@
+import signal
 from controller import L298N
 from i2c_connector import I2C
 from time import sleep
 
 
 class SolarTracker:
-    """ Controls the solar panels movement, using the I2C connection
-    to obtain the LDR values data, and the L298N to move the actuator. """
+    """
+    Solar tracking, centralizing the solar panel arrays to it.
+
+    ...
+
+    Attributes
+    ----------
+    address: int
+        Address of the I2C slave.
+    acceptable_deviation: int
+        Default deviation between the ldrs.
+    output_pins: list
+        List with tuples representing the pairs of output pins.
+        Always (Left, Right).
+    energy_channel: int
+        Raspberry Pi pin which will provide the energy.
+    ldr_count: int
+        Number of ldr.
+        Default=2.
+
+    Methods
+    -------
+    _no_movement()
+        Empty strategy which will not move the panels
+
+    _greedy_movement(ldr_values)
+        Returns the direction that has the highest amount of light
+
+    night_time_mode(ldr_values)
+        Verifies if the light is low enough to activate night mode
+
+    run(strategy)
+        Executes the process, processing the data and moving the array
+    """
 
     def __init__(self, address, acceptable_deviation,
                  output_pins, energy_channel, ldr_count=2):
+        # Attributes used to move the solar panel
         self.acceptable_deviation = acceptable_deviation
         self.output_pins = output_pins
         self.energy_channel = energy_channel
+
+        # Objects used to get data and activate the actuator
         self.controller = L298N(self.output_pins, self.energy_channel)
         self.i2c = I2C(address, ldr_count)
-        self.night_mode = False
+
+        # Strategies that can be used in the solar tracking
         self.strategies = {"empty": self._no_movement,
                            "greedy": self._greedy_movement}
 
-    def _no_movement(self, *args):
-        """ The actuator must stop. """
+        # If the docker container stops running, clear the pins
+        signal.signal(signal.SIGINT, self.controller.cleanup)
+        signal.signal(signal.SIGTERM, self.controller.cleanup)
+
+        # Attribut used to set the night mode on or off
+        self.night_mode = False
+
+    def _no_movement(self):
+        """
+        Strategy with no movement
+
+        ...
+
+        Returns
+        -------
+        string
+            Stop
+
+        """
         return "stop"
 
     def _greedy_movement(self, ldr_values):
+        """
+        Strategy that fetchs the direction with highest amount of light
+
+        Parameters
+        ----------
+
+        ldr_values: list
+            Contains the LDR values sent by the Arduino
+
+        Returns
+        -------
+        string
+            left if the left LDR has a value higher than the right one.
+            right if the right LDR has a value higher than the left one.
+            stop if both LDRs are within the acceptable deviation.
+
+        """
         if ldr_values[0] > ldr_values[1] + self.acceptable_deviation:
             return "left"
         if ldr_values[1] > ldr_values[0] + self.acceptable_deviation:
             return "right"
         return "stop"
 
-    def night_time_mode(self, ldr_list):
-        """ Verifies if the light is low enough to end the day and enter
-        the night mode. """
-        if ldr_list[0] < 100 and ldr_list[1] < 100 and not self.night_mode:
+    def night_time_mode(self, ldr_values):
+        """
+        Mode which will make the software pause when there isn't enought light
+
+        ...
+
+        Compares both LDR values to 100, if both are lower than the value, stops
+        the linear actuators and enters into the night mode, which will make new
+        requests every 5 minutes in order to verify if there is enough light to
+        come back to work.
+
+        Parameters
+        ----------
+        ldr_values: list
+            Contains the LDR values sent by the Arduino
+
+        Returns
+        -------
+            None
+
+        -------
+
+        """
+
+        if ldr_values[0] < 100 and ldr_values[1] < 100:
             self.controller.move("stop", self.output_pins)
             if self.night_mode is False:
                 print("Entering night mode...")
@@ -45,7 +137,34 @@ class SolarTracker:
             return None
 
     def run(self, strategy="empty"):
-        """ Runs the tracking. """
+        """
+        Executes the solar tracking, activating the linear actuators to move the
+        solar panel array
+
+        ...
+
+        Every 0.5 seconds, requests a new list of data from the Arduino,
+        process and validates it. If the LDR values are valid, verifies to
+        which direction the solar panel array should move and, if necessary,
+        moves it to that direction.
+        If the LDR values are not valid, stops any movement in order to keep
+        the precision of the software.
+
+        Parameters
+        ----------
+        strategy: string
+            Which strategy will be used to process the LDR data.
+            Default=empty
+
+        Exceptions
+        ----------
+        unvalid strategy:
+            Strategy not available in the software
+        IOError, OSError:
+            Errors hardware related, can be ignored and the software will
+        run normally
+
+        """
         if strategy not in self.strategies.keys():
             # Verifies if the strategy is valid
             raise Exception("Invalid strategy!")
@@ -57,7 +176,10 @@ class SolarTracker:
             if ldr_values:
                 # Gets the selected strategy from the strategies dict
                 # and pass the ldr_values as an argument
-                movement = self.strategies[strategy](ldr_values)
+                if strategy == "empty":
+                    movement = self.strategies[strategy]()
+                else:
+                    movement = self.strategies[strategy](ldr_values)
                 self.controller.move(movement, self.output_pins)
                 self.night_time_mode(ldr_values)
             else:

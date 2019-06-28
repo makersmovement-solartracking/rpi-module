@@ -1,4 +1,6 @@
 import os
+import logging
+
 if os.getenv("EXEC_MODE", "LOCAL") == "PROD":
     import RPi.GPIO as GPIO
     __LOCAL_MODE__ = False
@@ -14,18 +16,20 @@ else:
     HIGH = "high"
     BCM = "bcm"
 
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s:%(levelname)s:%(module)s:%(message)s')
 
 def cleanup(signum, frame):
     """ Cleans the GPIO pins. """
     if __LOCAL_MODE__:
-        print("Cleaned the pins")
+        logging.info("Cleaned the pins")
     else:
         GPIO.cleanup()
 
 def setup(pin_number, pin_type):
     """ Setups the GPIO pin. """
     if __LOCAL_MODE__:
-        print("Set pin {} to {}".format(pin_number, pin_type))
+        logging.info("Set pin {} to {}".format(pin_number, pin_type))
     else:
         GPIO.setup(pin_number, pin_type)
 
@@ -33,7 +37,7 @@ def setup(pin_number, pin_type):
 def setwarnings(condition):
     """ Sets the GPIO warnings false or true. """
     if __LOCAL_MODE__:
-        print("Set warnings to {}".format(condition))
+        logging.info("Set warnings to {}".format(condition))
     else:
         GPIO.setwarnings(condition)
 
@@ -41,7 +45,7 @@ def setwarnings(condition):
 def output(pin_number, pin_voltage):
     """ GPIO pin output. """
     if __LOCAL_MODE__:
-        print("Set pin {} to {}".format(pin_number, pin_voltage))
+        logging.info("Set pin {} to {}".format(pin_number, pin_voltage))
     else:
         GPIO.output(pin_number, pin_voltage)
 
@@ -49,7 +53,7 @@ def output(pin_number, pin_voltage):
 def PWM(pin_number, frequency):
     """ GPIO pin frequency. """
     if __LOCAL_MODE__:
-        print("Set pin {} to frequency {}".format(pin_number, frequency))
+        logging.info("Set pin {} to frequency {}".format(pin_number, frequency))
         return MockPWM()
     else:
         return GPIO.PWM(pin_number, frequency)
@@ -58,7 +62,7 @@ def PWM(pin_number, frequency):
 def setmode(operation):
     """ Sets the operation of the Raspberry Pi pins. """
     if __LOCAL_MODE__:
-        print("Set board operation mode to {}".format(operation))
+        logging.info("Set board operation mode to {}".format(operation))
     else:
         GPIO.setmode(operation)
 
@@ -71,8 +75,8 @@ class MockPWM():
 
     def start(self, level):
         """ Simulates the PWM start. """
-        print("PWM start")
+        logging.info("PWM Starts")
 
     def ChangeDutyCycle(self, level):
         """ Change the power of the pin output. """
-        print("Changed to {}".format(level))
+        logging.info("Changed to {}".format(level))

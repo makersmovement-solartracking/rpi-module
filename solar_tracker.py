@@ -1,8 +1,11 @@
 import signal
-from controller import L298N
+import logging
+import controller as ctrl
 from i2c_connector import I2C
 from time import sleep
 
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s:%(levelname)s:%(module)s:%(message)s')
 
 class SolarTracker:
     """
@@ -48,7 +51,7 @@ class SolarTracker:
         self.energy_channel = energy_channel
 
         # Objects used to get data and activate the actuator
-        self.controller = L298N(self.output_pins, self.energy_channel)
+        self.controller = ctrl.L298N(self.output_pins, self.energy_channel)
         self.i2c = I2C(address, ldr_count)
 
         # Strategies that can be used in the solar tracking
@@ -56,8 +59,8 @@ class SolarTracker:
                            "greedy": self._greedy_movement}
 
         # If the docker container stops running, clear the pins
-        signal.signal(signal.SIGINT, self.controller.cleanup)
-        signal.signal(signal.SIGTERM, self.controller.cleanup)
+        signal.signal(signal.SIGINT, ctrl.GPIO.cleanup)
+        signal.signal(signal.SIGTERM, ctrl.GPIO.cleanup)
 
         # Attribut used to set the night mode on or off
         self.night_mode = False
@@ -127,12 +130,12 @@ class SolarTracker:
         if ldr_values[0] < 100 and ldr_values[1] < 100:
             self.controller.move("stop", self.output_pins)
             if self.night_mode is False:
-                print("Entering night mode...")
+                logging.info("Entering night mode...")
                 self.night_mode = True
             sleep(300)
             return None
         elif self.night_mode:
-            print("Exiting night mode!")
+            logging.info("Exiting night mode!")
             self.night_mode = False
             return None
 

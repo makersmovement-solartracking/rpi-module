@@ -4,8 +4,8 @@ import logging
 from enum import Enum
 import gpio_connector as GPIO
 
-logging.basicConfig(level=logging.INFO,
-    format='%(asctime)s:%(levelname)s:%(module)s:%(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class L298N:
     """ Raspberry Pi module that controls the linear actuator
@@ -47,12 +47,12 @@ class L298N:
         try:
             return self.movements[direction](output_pins)
         except KeyError as error:
-            logging.warning("{}\n{}".format(error, "Invalid Movement"))
+            logger.warning("{}\n{}".format(error, "Invalid Movement"))
 
     def change_power(self, level):
         """ Changes the actuator power. """
         self.actuator.ChangeDutyCycle(level)
-        return logging.info("changed power to {}".format(level))
+        return logger.info("changed power to {}".format(level))
 
     def setup_output_pins(self):
         """ Setups the pins to out. """
@@ -75,7 +75,7 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.LOW)
             GPIO.output(pin_pairs[1], GPIO.LOW)
-        return logging.info("stopped")
+        return logger.info("stopped")
 
     @classmethod
     def left(cls, output_pins):
@@ -83,7 +83,7 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.HIGH)
             GPIO.output(pin_pairs[1], GPIO.LOW)
-        return logging.info("turned the panels to the left")
+        return logger.info("turned the panels to the left")
 
     @classmethod
     def right(cls, output_pins):
@@ -91,4 +91,4 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.LOW)
             GPIO.output(pin_pairs[1], GPIO.HIGH)
-        return logging.info("turned the panels to the right")
+        return logger.info("turned the panels to the right")

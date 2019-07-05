@@ -4,8 +4,8 @@ import controller as ctrl
 from i2c_connector import I2C
 from time import sleep
 
-logging.basicConfig(level=logging.INFO,
-    format='%(asctime)s:%(levelname)s:%(module)s:%(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class SolarTracker:
     """
@@ -130,12 +130,12 @@ class SolarTracker:
         if ldr_values[0] < 100 and ldr_values[1] < 100:
             self.controller.move("stop", self.output_pins)
             if self.night_mode is False:
-                logging.info("Entering night mode...")
+                logger.info("Entering night mode...")
                 self.night_mode = True
             sleep(300)
             return None
         elif self.night_mode:
-            logging.info("Exiting night mode!")
+            logger.info("Exiting night mode!")
             self.night_mode = False
             return None
 

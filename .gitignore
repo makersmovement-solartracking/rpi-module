@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Arduino makefile
+arduino/i2c/Makefile

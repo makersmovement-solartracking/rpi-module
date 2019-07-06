@@ -1,110 +1,94 @@
+""" Controls the linear actuator movements. """
+
+import logging
+from enum import Enum
 import gpio_connector as GPIO
 
-
-# LINEAR ACTUATOR OBJECT
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class L298N:
+    """ Raspberry Pi module that controls the linear actuator
+    movements. """
 
-    # Params
+    def __init__(self, output_pins, energy_channel):
 
-    input1 = 24
-    input2 = 23
-    en = 25
-    p = None
-
-    def __init__(self):
+        # Pins
+        self.output_pins = output_pins
+        self.energy_channel = energy_channel
 
         # Initialize GPIO pins
-
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.input1, GPIO.OUT)
-        GPIO.setup(self.input2, GPIO.OUT)
-        GPIO.setup(self.en, GPIO.OUT)
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.LOW)
-        self.p = GPIO.PWM(self.en, 1000)
-        self.p.start()
+        self.setup_output_pins()
+        GPIO.setup(self.energy_channel, GPIO.OUT)
+        self.initialize_output_pins()
+        self.actuator = GPIO.PWM(self.energy_channel, 1000)
+        self.actuator.start(25)
+
+        # Set warnings off
+        GPIO.setwarnings(False)
 
         # Set default to low
         self.change_power(25)
 
         # Map of inputs to commands
         self.movemap = {
-            'stop': self.stop(),
-            'forward': self.forward(),
-            'backward': self.backward(),
             'low': self.change_power(25),
             'medium': self.change_power(50),
-            'high': self.change_power(75)
-            }
+            'high': self.change_power(75)}
 
-    def move_multi(self, directions):
+        self.movements = {"stop": Movements.stop,
+                          "right": Movements.right,
+                          "left": Movements.left
+                          }
 
-        # In case you wanted to execute multiple directions
-        # for example, move_multi(["forward", "stop", "backward"])
-
-        for direction in directions:
-            return self.move(direction)
-
-    def move(self, direction):
+    def move(self, direction, output_pins):
+        """ Moves to a given direction. """
         try:
-            return self.movemap[direction]
-        except KeyError as e:
-            print(str(e))
-            raise KeyError("Please enter a valid instruction {}".format(
-                self.movemap.keys())
-            )
-
-    # MOVE COMMANDS
-
-    def stop(self):
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.LOW)
-        return "stopped"
-
-    def forward(self):
-        GPIO.output(self.input1, GPIO.HIGH)
-        GPIO.output(self.input2, GPIO.LOW)
-        return "forwarded"
-
-    def backward(self):
-        GPIO.output(self.input1, GPIO.LOW)
-        GPIO.output(self.input2, GPIO.HIGH)
-        return "backwarded"
+            return self.movements[direction](output_pins)
+        except KeyError as error:
+            logger.warning("{}\n{}".format(error, "Invalid Movement"))
 
     def change_power(self, level):
-        self.p.ChangeDutyCycle(level)
-        return "changed to {}".format(level)
+        """ Changes the actuator power. """
+        self.actuator.ChangeDutyCycle(level)
+        return logger.info("changed power to {}".format(level))
+
+    def setup_output_pins(self):
+        """ Setups the pins to out. """
+        for pins in self.output_pins:
+            GPIO.setup(pins, GPIO.OUT)
+
+    def initialize_output_pins(self):
+        """ initializes the output pins to low """
+        for pins in self.output_pins:
+            GPIO.output(pins[0], GPIO.LOW)
+            GPIO.output(pins[1], GPIO.LOW)
 
 
+class Movements(Enum):
+    """ Movements that can be done by the GPIO. """
 
+    @classmethod
+    def stop(cls, output_pins):
+        """ Stops the actuator. """
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.LOW)
+            GPIO.output(pin_pairs[1], GPIO.LOW)
+        return logger.info("stopped")
 
+    @classmethod
+    def left(cls, output_pins):
+        """ Moves forward, turning the panels to the left"""
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.HIGH)
+            GPIO.output(pin_pairs[1], GPIO.LOW)
+        return logger.info("turned the panels to the left")
 
-#LDR OBJECT
-
-# WIP
-
-# class LDR:
-
-#     self.pin = 4
-
-#     def __init__(self):
-#         pass
-
-#     def get_value(self):
-#         # Returns the value of the LDR
-#         pass
-
-#     def rc_time(self):
-#         count = 0
-
-#         GPIO.setup(self.pin, GPIO.OUT)
-#         GPIO.output(self.pin, GPIO.LOW)
-#         time.sleep(0.1)
-
-#         GPIO.setup(self.pin, GPIO.IN)
-
-#         while (GPIO.input(self.pin) == GPIO.LOW):
-#             count += 1
-
-#         return count
+    @classmethod
+    def right(cls, output_pins):
+        """ Moves backward, turning the panels to the right """
+        for pin_pairs in output_pins:
+            GPIO.output(pin_pairs[0], GPIO.LOW)
+            GPIO.output(pin_pairs[1], GPIO.HIGH)
+        return logger.info("turned the panels to the right")

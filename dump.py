@@ -1,6 +1,5 @@
 """ Gets the value o n LDRs and append it to a csv file. """
 
-import logging
 from time import sleep
 from csv import writer
 from datetime import datetime
@@ -9,8 +8,8 @@ from i2c_connector import I2C
 
 ADDRESS = 0X8
 LDR_COUNT = 4
-I2C_SLAVE = I2C(ADDRESS, LDR_COUNT)
-logging.basicConfig(level=logging.INFO, format=('%(levelname)s:%(message)s'))
+i2c_slave = I2C(ADDRESS, LDR_COUNT)
+
 
 def write_to_csv_file(data, filename="out.csv"):
     """ Appends the data to a CSV file. """
@@ -42,12 +41,12 @@ def get_csv_data_list(data):
 
 while True:
     try:
-        LDR_VALUES = I2C_SLAVE.get_ldr_values()
+        LDR_VALUES = i2c_slave.get_ldr_values()
     except (IOError, OSError):
         continue
     CSV_DATA = get_csv_data_list(LDR_VALUES)  # Creates the CSV list
     write_to_csv_file(CSV_DATA)  # Appends the data to the CSV file
     # Get the LDR values string
     LDR_VALUES_BY_TIME = get_ldr_values_by_time_string(LDR_VALUES)
-    logging.info(LDR_VALUES_BY_TIME)  # Prints the LDR values
+    print(LDR_VALUES_BY_TIME)  # Prints the LDR values
     sleep(1)

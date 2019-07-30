@@ -1,11 +1,12 @@
 import signal
 import logging
-import controller as ctrl
+import controller
 from i2c_connector import I2C
 from time import sleep
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
 
 class SolarTracker:
     """
@@ -51,7 +52,7 @@ class SolarTracker:
         self.energy_channel = energy_channel
 
         # Objects used to get data and activate the actuator
-        self.controller = ctrl.L298N(self.output_pins, self.energy_channel)
+        self.controller = controller.L298N(self.output_pins, self.energy_channel)
         self.i2c = I2C(address, ldr_count)
 
         # Strategies that can be used in the solar tracking
@@ -59,8 +60,8 @@ class SolarTracker:
                            "greedy": self._greedy_movement}
 
         # If the docker container stops running, clear the pins
-        signal.signal(signal.SIGINT, ctrl.GPIO.cleanup)
-        signal.signal(signal.SIGTERM, ctrl.GPIO.cleanup)
+        signal.signal(signal.SIGINT, controller.GPIO.cleanup)
+        signal.signal(signal.SIGTERM, controller.GPIO.cleanup)
 
         # Attribut used to set the night mode on or off
         self.night_mode = False
@@ -198,6 +199,6 @@ if __name__ == "__main__":
     # they must be tuples. (Left, Right)
     OUTPUT_PINS = [(23, 24)]
     ENERGY_CHANNEL = 25
-    SOLAR_TRACKER = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION,
+    solar_tracker = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION,
                                  OUTPUT_PINS, ENERGY_CHANNEL)
-    SOLAR_TRACKER.run()  # Argument must be the strategy used in the tracking
+    solar_tracker.run()  # Argument must be the strategy used in the tracking

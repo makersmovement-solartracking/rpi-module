@@ -1,7 +1,7 @@
 import signal
 import logging
 import controller
-from i2c_connector import I2C
+from i2c_connector import I2C, EmptyLDRListException, OddLDRListException, UnvalidLDRListValuesException
 from time import sleep
 
 logger = logging.getLogger(__name__)
@@ -174,22 +174,26 @@ class SolarTracker:
             raise Exception("Invalid strategy!")
         while True:
             try:
+                sleep(0.5)
                 ldr_values = self.i2c.get_ldr_values()
+          
             except (IOError, OSError):
                 continue
-            if ldr_values:
-                # Gets the selected strategy from the strategies dict
-                # and pass the ldr_values as an argument
-                if strategy == "empty":
-                    movement = self.strategies[strategy]()
-                else:
-                    movement = self.strategies[strategy](ldr_values)
-                self.controller.move(movement, self.output_pins)
-                self.night_time_mode(ldr_values)
-            else:
-                # invalid ldr_values
+        
+            except (OddLDRListException, EmptyLDRListException, UnvalidLDRListValuesException) as e:
                 self.controller.move("stop", self.output_pins)
-            sleep(0.5)
+                print(str(e))
+                continue
+            
+            # Gets the selected strategy from the strategies dict
+            # and pass the ldr_values as an argument
+            if strategy == "empty":
+                movement = self.strategies[strategy]()
+            else:
+                movement = self.strategies[strategy](ldr_values)
+            self.controller.move(movement, self.output_pins)
+            self.night_time_mode(ldr_values)
+
 
 
 if __name__ == "__main__":

@@ -20,9 +20,8 @@ class I2C:
         """ Gets the ldr values and validates it. """
         brute_data = self.get_arduino_data()
         ldr_values = convert_byte_to_integer(brute_data)
-        if validates_ldr_data(ldr_values):
-            return ldr_values
-        return False
+        validates_ldr_data(ldr_values)
+        return ldr_values
 
 
 def convert_byte_to_integer(data):
@@ -46,30 +45,41 @@ def check_ldr_list_length(ldr_list):
         raise EmptyLDRListException
     if len(ldr_list) % 2 != 0:
         raise OddLDRListException
-    return True
 
 
 def validates_ldr_data(ldr_list):
     """ Validates the values sent to the Raspberry pi
     from the Arduino. """
-    if check_ldr_list_length(ldr_list):
-        if 65535 in ldr_list:
-            # Checks if the ldr_list has a invalid value (65535)
-            return False
-        else:
-            return True
-    return False
+    check_ldr_list_length(ldr_list)
+    if 65535 in ldr_list:
+        raise UnvalidLDRListValuesException
+    else:
+        return True
 
 class OddLDRListException(Exception):
     """ Exception for an odd LDR list. """
-    def __init__(self):
-        self.message = "LDR list is odd."
-        super().__init__(self.message)
 
+    def __init__(self):
+        self.msg = "LDR list is odd."
+    
+    def __str__(self):
+        return repr(self.msg)
 
 class EmptyLDRListException(Exception):
     """ Exception for an empty ldr list. """
+
     def __init__(self):
-        self.message = "LDR list is empty"
-        super().__init__(self.message)
+        self.msg = "LDR list is empty."
+    
+    def __str__(self):
+        return repr(self.msg)
   
+
+class UnvalidLDRListValuesException(Exception):
+    """ Exception for an unvalid ldr list. """
+
+    def __init__(self):
+        self.msg = "Transfered unvalid values."
+    
+    def __str__(self):
+        return repr(self.msg)

@@ -5,7 +5,6 @@
 void sendData();
 
 void setup() {
-  Serial.begin(9600);
   // Start the connections as a slave
   Wire.begin(SlaveAddress);
   // When the R_Pi requests data from the arduino, call the sendData function.
@@ -35,7 +34,6 @@ void sendData() {
   // Length of the LDR's value array and length of LDR's byte value array
   int ldrLength = (sizeof(ldrIntValues) / sizeof(ldrIntValues[0]));
   int ldrByteLength = ldrLength * 2;
-  Serial.println(ldrByteLength);
 
   // Declares an array which will store the byte values
   byte ldrArray[ldrByteLength];

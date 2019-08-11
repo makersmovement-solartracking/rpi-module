@@ -79,7 +79,7 @@ class UnvalidLDRListValuesException(Exception):
     """ Exception for an unvalid ldr list. """
 
     def __init__(self):
-        self.msg = "Transfered unvalid values."
+        self.msg = "Transfered invalid values."
     
     def __str__(self):
         return repr(self.msg)

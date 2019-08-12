@@ -177,12 +177,13 @@ class SolarTracker:
                 sleep(0.5)
                 ldr_values = self.i2c.get_ldr_values()
           
-            except (IOError, OSError):
+            except (IOError, OSError) as e:
+                logger.warning(str(e))
                 continue
         
             except (OddLDRListException, EmptyLDRListException, UnvalidLDRListValuesException) as e:
                 self.controller.move("stop", self.output_pins)
-                print(str(e))
+                logger.warning(str(e))
                 continue
             
             # Gets the selected strategy from the strategies dict

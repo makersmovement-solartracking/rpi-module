@@ -7,6 +7,7 @@ import gpio_connector as GPIO
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class L298N:
     """ Raspberry Pi module that controls the linear actuator
     movements. """

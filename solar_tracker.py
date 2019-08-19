@@ -66,7 +66,7 @@ class SolarTracker:
         # Attribut used to set the night mode on or off
         self.night_mode = False
 
-    def _no_movement(self):
+    def _no_movement(self, *args):
         """
         Strategy with no movement
 
@@ -188,10 +188,7 @@ class SolarTracker:
             
             # Gets the selected strategy from the strategies dict
             # and pass the ldr_values as an argument
-            if strategy == "empty":
-                movement = self.strategies[strategy]()
-            else:
-                movement = self.strategies[strategy](ldr_values)
+            movement = self.strategies[strategy](ldr_values)
             self.controller.move(movement, self.output_pins)
             self.night_time_mode(ldr_values)
 

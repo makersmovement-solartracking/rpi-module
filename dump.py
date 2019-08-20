@@ -3,7 +3,7 @@
 from time import sleep
 from csv import writer
 from datetime import datetime
-from i2c_connector import I2C, EmptyLDRListException, OddLDRListException, UnvalidLDRListValuesException
+from i2c_connector import I2C, InvalidLDRListValuesException, InvalidLDRListException
 import sys
 
 
@@ -38,7 +38,7 @@ while True:
         print(str(e))
         continue
 
-    except (OddLDRListException, EmptyLDRListException, UnvalidLDRListValuesException) as e:
+    except (InvalidLDRListValuesException, InvalidLDRListException) as e:
         print(str(e))
         continue
 

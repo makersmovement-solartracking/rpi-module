@@ -20,7 +20,8 @@ class I2C:
         """ Gets the ldr values and validates it. """
         brute_data = self.get_arduino_data()
         ldr_values = convert_byte_to_integer(brute_data)
-        validates_ldr_data(ldr_values)
+        if not is_valid_ldr_data(ldr_values):
+            raise InvalidLDRListValuesException
         return ldr_values
 
 

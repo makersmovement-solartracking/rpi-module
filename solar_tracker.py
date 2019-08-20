@@ -1,7 +1,7 @@
 import signal
 import logging
 import controller
-from i2c_connector import I2C, EmptyLDRListException, OddLDRListException, UnvalidLDRListValuesException
+from i2c_connector import I2C, InvalidLDRListException, InvalidLDRListValuesException
 from time import sleep
 
 logger = logging.getLogger(__name__)
@@ -181,7 +181,7 @@ class SolarTracker:
                 logger.warning(str(e))
                 continue
         
-            except (OddLDRListException, EmptyLDRListException, UnvalidLDRListValuesException) as e:
+            except (InvalidLDRListException, InvalidLDRListValuesException) as e:
                 self.controller.move("stop", self.output_pins)
                 logger.warning(str(e))
                 continue

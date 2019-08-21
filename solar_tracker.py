@@ -66,11 +66,15 @@ class SolarTracker:
         # Attribut used to set the night mode on or off
         self.night_mode = False
 
-    def _no_movement(self, *args):
+    def _no_movement(self, ldr_values):
         """
         Strategy with no movement
 
-        ...
+        Parameters
+        ----------
+
+        ldr_values: list
+            Contains the LDR values sent by the Arduino
 
         Returns
         -------

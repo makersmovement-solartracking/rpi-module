@@ -132,7 +132,7 @@ class SolarTracker:
 
         """
 
-        if ldr_values[0] < 100 and ldr_values[1] < 100:
+        if ldr_values[0] < 10 and ldr_values[1] < 10:
             self.controller.move("stop", self.output_pins)
             if self.night_mode is False:
                 logger.info("Entering night mode...")

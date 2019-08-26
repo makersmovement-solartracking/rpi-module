@@ -200,7 +200,7 @@ class SolarTracker:
 
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08  # Address of the Arduino
-    ACCEPTABLE_DEVIATION = 100  # Normal deviation between the LDRs
+    ACCEPTABLE_DEVIATION = 50  # Normal deviation between the LDRs
     # Output pins which will be connected to each actuator
     # they must be tuples. (Left, Right)
     OUTPUT_PINS = [(23, 24)]

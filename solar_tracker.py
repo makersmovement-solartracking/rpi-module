@@ -207,4 +207,4 @@ if __name__ == "__main__":
     ENERGY_CHANNEL = 25
     solar_tracker = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION,
                                  OUTPUT_PINS, ENERGY_CHANNEL)
-    solar_tracker.run()  # Argument must be the strategy used in the tracking
+    solar_tracker.run("greedy")  # Argument must be the strategy used in the tracking

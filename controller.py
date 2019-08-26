@@ -29,8 +29,8 @@ class L298N:
         # Set warnings off
         GPIO.setwarnings(False)
 
-        # Set default to low
-        self.change_power(25)
+        # Set default to medium
+        self.change_power(50)
 
         # Map of inputs to commands
         self.movemap = {

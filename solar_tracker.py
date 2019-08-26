@@ -180,22 +180,21 @@ class SolarTracker:
             try:
                 sleep(0.5)
                 ldr_values = self.i2c.get_ldr_values()
-          
+
             except (IOError, OSError) as e:
                 logger.warning(str(e))
                 continue
-        
+
             except (InvalidLDRListException, InvalidLDRListValuesException) as e:
                 self.controller.move("stop", self.output_pins)
                 logger.warning(str(e))
                 continue
-            
+
             # Gets the selected strategy from the strategies dict
             # and pass the ldr_values as an argument
             movement = self.strategies[strategy](ldr_values)
             self.controller.move(movement, self.output_pins)
             self.night_time_mode(ldr_values)
-
 
 
 if __name__ == "__main__":

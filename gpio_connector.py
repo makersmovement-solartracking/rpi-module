@@ -1,5 +1,5 @@
 import os
-import logging
+import logging, logging.config
 
 
 if os.getenv("EXEC_MODE", "LOCAL") == "PROD":
@@ -17,8 +17,9 @@ else:
     HIGH = "high"
     BCM = "bcm"
 
+logging.config.fileConfig(fname='logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
 
 def cleanup(signum, frame):
     """ Cleans the GPIO pins. """

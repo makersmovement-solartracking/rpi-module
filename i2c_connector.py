@@ -62,7 +62,7 @@ class InvalidLDRListException(Exception):
     """ Exception for an invalid LDR list. """
 
     def __init__(self):
-        self.msg = "Invalid LDR List.\nThe transfered list is either odd or empty."
+        self.msg = "Invalid LDR List. The transfered list is either odd or empty."
 
     def __str__(self):
         return repr(self.msg)
@@ -72,7 +72,7 @@ class InvalidLDRListValuesException(Exception):
     """ Exception for an invalid ldr list. """
 
     def __init__(self):
-        self.msg = "Invalid LDR Value.\nThe LDR values will not be used."
+        self.msg = "Invalid LDR Value. The LDR values will not be used."
 
     def __str__(self):
         return repr(self.msg)

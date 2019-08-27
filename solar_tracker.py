@@ -188,11 +188,12 @@ class SolarTracker:
                 logger.exception(str(e))
                 continue
 
+            # Verifies if it's night or if there isn't a good amount of light
+            self.night_time_mode(ldr_values)
             # Gets the selected strategy from the strategies dict
             # and pass the ldr_values as an argument
             movement = self.strategies[strategy](ldr_values)
             self.controller.move(movement, self.output_pins)
-            self.night_time_mode(ldr_values)
 
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08  # Address of the Arduino

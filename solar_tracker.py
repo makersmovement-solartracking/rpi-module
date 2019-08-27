@@ -138,11 +138,9 @@ class SolarTracker:
                 logger.info("Entering night mode...")
                 self.night_mode = True
             sleep(300)
-            return None
         elif self.night_mode:
             logger.info("Exiting night mode!")
             self.night_mode = False
-            return None
 
     def run(self, strategy="empty"):
         """

@@ -1,11 +1,11 @@
 import signal
-import logging
+import logging, logging.config
 import controller
 from i2c_connector import I2C, InvalidLDRListException, InvalidLDRListValuesException
 from time import sleep
 
+logging.config.fileConfig(fname='logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class SolarTracker:
@@ -182,12 +182,12 @@ class SolarTracker:
                 ldr_values = self.i2c.get_ldr_values()
 
             except (IOError, OSError) as e:
-                logger.warning(str(e))
+                logger.exception(str(e))
                 continue
 
             except (InvalidLDRListException, InvalidLDRListValuesException) as e:
                 self.controller.move("stop", self.output_pins)
-                logger.warning(str(e))
+                logger.exception(str(e))
                 continue
 
             # Gets the selected strategy from the strategies dict
@@ -195,7 +195,6 @@ class SolarTracker:
             movement = self.strategies[strategy](ldr_values)
             self.controller.move(movement, self.output_pins)
             self.night_time_mode(ldr_values)
-
 
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08  # Address of the Arduino

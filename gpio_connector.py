@@ -27,6 +27,7 @@ def cleanup(signum, frame):
         logger.info("Cleaned the pins")
     else:
         GPIO.cleanup()
+    quit()
 
 def setup(pin_number, pin_type):
     """ Setups the GPIO pin. """

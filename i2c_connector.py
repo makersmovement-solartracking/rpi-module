@@ -20,9 +20,11 @@ class I2C:
         """ Gets the ldr values and validates it. """
         brute_data = self.get_arduino_data()
         ldr_values = convert_byte_to_integer(brute_data)
-        if validates_ldr_data(ldr_values):
-            return ldr_values
-        return False
+        if not is_valid_ldr_list(ldr_values):
+            raise InvalidLDRListException
+        if not is_valid_ldr_data(ldr_values):
+            raise InvalidLDRListValuesException
+        return ldr_values
 
 
 def convert_byte_to_integer(data):
@@ -39,37 +41,38 @@ def aggregate_bytes(most_representative, least_representative):
     return (most_representative << 8 | least_representative) & 0xffffffff
 
 
-def check_ldr_list_length(ldr_list):
-    """ Checks the length of the ldr list, verifying if it's
-    odd, even or empty. """
-    if not ldr_list:
-        raise EmptyLDRListException
-    if len(ldr_list) % 2 != 0:
-        raise OddLDRListException
-    return True
+def is_valid_ldr_list(ldr_list):
+    """ Checks the length of the ldr list,
+    verifying if it has an valid length. """
+    if not ldr_list or len(ldr_list) % 2 != 0:
+        return False
+    else:
+        return True
 
 
-def validates_ldr_data(ldr_list):
-    """ Validates the values sent to the Raspberry pi
-    from the Arduino. """
-    if check_ldr_list_length(ldr_list):
-        if 65535 in ldr_list:
-            # Checks if the ldr_list has a invalid value (65535)
-            return False
-        else:
-            return True
-    return False
+def is_valid_ldr_data(ldr_list):
+    """ Validates the values sent to the Raspberry Pi from the Arduino. """
+    if 65535 in ldr_list:
+        return False
+    else:
+        return True
 
-class OddLDRListException(Exception):
-    """ Exception for an odd LDR list. """
+
+class InvalidLDRListException(Exception):
+    """ Exception for an invalid LDR list. """
+
     def __init__(self):
-        self.message = "LDR list is odd."
-        super().__init__(self.message)
+        self.msg = "Invalid LDR List. The transfered list is either odd or empty."
+
+    def __str__(self):
+        return repr(self.msg)
 
 
-class EmptyLDRListException(Exception):
-    """ Exception for an empty ldr list. """
+class InvalidLDRListValuesException(Exception):
+    """ Exception for an invalid ldr list. """
+
     def __init__(self):
-        self.message = "LDR list is empty"
-        super().__init__(self.message)
-  
+        self.msg = "Invalid LDR Value. The LDR values will not be used."
+
+    def __str__(self):
+        return repr(self.msg)

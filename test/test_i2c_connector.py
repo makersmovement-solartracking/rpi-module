@@ -12,33 +12,31 @@ def test_aggregate_bytes():
 def test_empty_ldr_list():
     """ Tests the answer if the ldr list is empty"""
     ldr_list = []
-    with pytest.raises(i2c.EmptyLDRListException) as EmptyListException:
-        i2c.check_ldr_list_length(ldr_list)
+    assert i2c.is_valid_ldr_list(ldr_list) is False
 
 
 def test_odd_ldr_list():
     """ Tests the answer if the ldr list is odd."""
     ldr_list = [255, 255, 255]
-    with pytest.raises(i2c.OddLDRListException) as OddListException:
-        i2c.check_ldr_list_length(ldr_list)
+    assert i2c.is_valid_ldr_list(ldr_list) is False
 
 
 def test_even_ldr_list():
     """ Tests the software behavior when the ldr list is
     even. """
     ldr_list = [255, 255, 255, 255]
-    assert i2c.check_ldr_list_length(ldr_list) is True
+    assert i2c.is_valid_ldr_list(ldr_list) is True
 
 
 def test_invalid_ldr_values_list():
     """ Tests the validation of an invalid ldr values
     list. """
     ldr_list = [300, 487, 908, 65535]
-    assert i2c.validates_ldr_data(ldr_list) is False
+    assert i2c.is_valid_ldr_data(ldr_list) is False
 
 
 def test_valid_ldr_values_list():
     """ Tests the validation of a valid ldr values
     list. """
     ldr_list = [300, 487, 908, 920]
-    assert i2c.validates_ldr_data(ldr_list) is True
+    assert i2c.is_valid_ldr_data(ldr_list) is True

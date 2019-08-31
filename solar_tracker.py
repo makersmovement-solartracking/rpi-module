@@ -1,11 +1,12 @@
 import signal
-import logging
-import controller as ctrl
-from i2c_connector import I2C
+import logging, logging.config
+import controller
+from i2c_connector import I2C, InvalidLDRListException, InvalidLDRListValuesException
 from time import sleep
 
+logging.config.fileConfig(fname='logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
 
 class SolarTracker:
     """
@@ -51,7 +52,7 @@ class SolarTracker:
         self.energy_channel = energy_channel
 
         # Objects used to get data and activate the actuator
-        self.controller = ctrl.L298N(self.output_pins, self.energy_channel)
+        self.controller = controller.L298N(self.output_pins, self.energy_channel)
         self.i2c = I2C(address, ldr_count)
 
         # Strategies that can be used in the solar tracking
@@ -59,17 +60,21 @@ class SolarTracker:
                            "greedy": self._greedy_movement}
 
         # If the docker container stops running, clear the pins
-        signal.signal(signal.SIGINT, ctrl.GPIO.cleanup)
-        signal.signal(signal.SIGTERM, ctrl.GPIO.cleanup)
+        signal.signal(signal.SIGINT, controller.GPIO.cleanup)
+        signal.signal(signal.SIGTERM, controller.GPIO.cleanup)
 
         # Attribut used to set the night mode on or off
         self.night_mode = False
 
-    def _no_movement(self):
+    def _no_movement(self, ldr_values):
         """
         Strategy with no movement
 
-        ...
+        Parameters
+        ----------
+
+        ldr_values: list
+            Contains the LDR values sent by the Arduino
 
         Returns
         -------
@@ -127,17 +132,15 @@ class SolarTracker:
 
         """
 
-        if ldr_values[0] < 100 and ldr_values[1] < 100:
+        if ldr_values[0] < 10 and ldr_values[1] < 10:
             self.controller.move("stop", self.output_pins)
             if self.night_mode is False:
                 logger.info("Entering night mode...")
                 self.night_mode = True
             sleep(300)
-            return None
         elif self.night_mode:
             logger.info("Exiting night mode!")
             self.night_mode = False
-            return None
 
     def run(self, strategy="empty"):
         """
@@ -173,31 +176,32 @@ class SolarTracker:
             raise Exception("Invalid strategy!")
         while True:
             try:
+                sleep(0.5)
                 ldr_values = self.i2c.get_ldr_values()
-            except (IOError, OSError):
-                continue
-            if ldr_values:
-                # Gets the selected strategy from the strategies dict
-                # and pass the ldr_values as an argument
-                if strategy == "empty":
-                    movement = self.strategies[strategy]()
-                else:
-                    movement = self.strategies[strategy](ldr_values)
-                self.controller.move(movement, self.output_pins)
-                self.night_time_mode(ldr_values)
-            else:
-                # invalid ldr_values
-                self.controller.move("stop", self.output_pins)
-            sleep(0.5)
 
+            except (IOError, OSError) as e:
+                logger.exception(str(e))
+                continue
+
+            except (InvalidLDRListException, InvalidLDRListValuesException) as e:
+                self.controller.move("stop", self.output_pins)
+                logger.exception(str(e))
+                continue
+
+            # Verifies if it's night or if there isn't a good amount of light
+            self.night_time_mode(ldr_values)
+            # Gets the selected strategy from the strategies dict
+            # and pass the ldr_values as an argument
+            movement = self.strategies[strategy](ldr_values)
+            self.controller.move(movement, self.output_pins)
 
 if __name__ == "__main__":
     ARDUINO_ADDRESS = 0X08  # Address of the Arduino
-    ACCEPTABLE_DEVIATION = 100  # Normal deviation between the LDRs
+    ACCEPTABLE_DEVIATION = 50  # Normal deviation between the LDRs
     # Output pins which will be connected to each actuator
     # they must be tuples. (Left, Right)
     OUTPUT_PINS = [(23, 24)]
     ENERGY_CHANNEL = 25
-    SOLAR_TRACKER = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION,
+    solar_tracker = SolarTracker(ARDUINO_ADDRESS, ACCEPTABLE_DEVIATION,
                                  OUTPUT_PINS, ENERGY_CHANNEL)
-    SOLAR_TRACKER.run()  # Argument must be the strategy used in the tracking
+    solar_tracker.run("greedy")  # Argument must be the strategy used in the tracking

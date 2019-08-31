@@ -1,11 +1,12 @@
 """ Controls the linear actuator movements. """
 
-import logging
+import logging, logging.config
 from enum import Enum
 import gpio_connector as GPIO
 
+logging.config.fileConfig(fname='logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
 
 class L298N:
     """ Raspberry Pi module that controls the linear actuator
@@ -28,8 +29,8 @@ class L298N:
         # Set warnings off
         GPIO.setwarnings(False)
 
-        # Set default to low
-        self.change_power(25)
+        # Set default to medium
+        self.change_power(50)
 
         # Map of inputs to commands
         self.movemap = {
@@ -75,7 +76,7 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.LOW)
             GPIO.output(pin_pairs[1], GPIO.LOW)
-        return logger.info("stopped")
+        return logger.info("Stopped the movements")
 
     @classmethod
     def left(cls, output_pins):
@@ -83,7 +84,7 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.HIGH)
             GPIO.output(pin_pairs[1], GPIO.LOW)
-        return logger.info("turned the panels to the left")
+        return logger.info("Turning the panels to the left")
 
     @classmethod
     def right(cls, output_pins):
@@ -91,4 +92,4 @@ class Movements(Enum):
         for pin_pairs in output_pins:
             GPIO.output(pin_pairs[0], GPIO.LOW)
             GPIO.output(pin_pairs[1], GPIO.HIGH)
-        return logger.info("turned the panels to the right")
+        return logger.info("Turning the panels to the right")

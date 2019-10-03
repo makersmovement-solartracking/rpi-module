@@ -31,7 +31,7 @@ def get_ldr_values_by_time_string(data):
 
 while True:
     try:
-        sleep(1)
+        sleep(0.2)
         ldr_values = i2c_slave.get_ldr_values()
 
     except (IOError, OSError) as e:

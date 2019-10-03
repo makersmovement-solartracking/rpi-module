@@ -29,14 +29,8 @@ class L298N:
         # Set warnings off
         GPIO.setwarnings(False)
 
-        # Set default to medium
-        self.change_power(50)
-
-        # Map of inputs to commands
-        self.movemap = {
-            'low': self.change_power(25),
-            'medium': self.change_power(50),
-            'high': self.change_power(75)}
+        # Sets duty_cycle to 100% -> 12 Volts
+        self.change_power(100)
 
         self.movements = {"stop": Movements.stop,
                           "right": Movements.right,
